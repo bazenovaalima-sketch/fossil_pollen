@@ -1,8 +1,5 @@
 # Figures
 
-This folder contains **curated, publication-ready figures** summarizing the performance of the pollen and microfossil detection model.  
-Only selected figures that provide clear scientific insight are included here; raw training outputs are stored elsewhere.
-
 ---
 
 ## 📊 Performance Figures
