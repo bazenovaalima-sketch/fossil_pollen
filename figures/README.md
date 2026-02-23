@@ -34,14 +34,5 @@ This figure is the primary diagnostic tool for understanding classification erro
 - Illustrates performance differences between well-represented and rare taxa
 - Used to justify class merging and discuss dataset imbalance effects
 
----
 
-## 🖼 Annotated Examples
 
-Representative annotated examples are included to provide qualitative validation of the model.
-
-- **Two examples per class**
-- Selected from the test set
-- Illustrate typical detection quality and taxon-specific morphology
-
-These figures complement quantitative metrics by showing how predictions appear in practice.
