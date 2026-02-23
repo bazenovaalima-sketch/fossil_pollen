@@ -33,6 +33,6 @@ Key characteristics:
 fossil_pollen/
 ├── training/    # YOLO training scripts
 ├── inference/   # Inference on unseen images
-├── data/        # Dataset documentation (no raw images)
+├── data/        # Dataset documentation
 ├── results/     # Evaluation metrics and example predictions
-├── figures/     # Figures for documentation and thesis
+├── figures/     # Performance figures 
