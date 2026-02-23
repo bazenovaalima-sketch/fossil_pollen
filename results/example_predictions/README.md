@@ -11,7 +11,7 @@ The examples demonstrate:
 ## Model limitations
 
 Example failure cases, including false positives and missed detections, are documented in  
-`results/failure_cases/`.
+`results/example_predictions/failure_cases/`.
 
 These errors are mainly associated with:
 - strong class imbalance,
