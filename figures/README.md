@@ -19,7 +19,7 @@ This figure is the primary diagnostic tool for understanding classification erro
 ---
 
 ### 2. Precision–Recall Curve (All Classes)  
-**File:** `pr_curve_all.png`
+**File:** `BoxPR_curve.png`
 
 - Shows the global precision–recall trade-off across all taxa
 - The area under the curve corresponds to the reported **mAP@0.5**
