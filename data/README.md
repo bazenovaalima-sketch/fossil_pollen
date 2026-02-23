@@ -16,10 +16,44 @@ Images were manually annotated using bounding boxes in Roboflow and exported in 
 - Total annotated objects: 2,770
 - Annotation format: YOLO (bounding boxes)
 - Each bounding box corresponds to a single pollen grain or particle.
-
+- **32 taxonomic classes** after merging rare taxa at the family or functional group level
+    
 ## Taxonomic strategy
 
-The original annotation included a large number of pollen taxa with highly imbalanced class frequencies. To reduce classification ambiguity and ensure sufficient training samples per class, several rare or morphologically similar taxa were merged at the family or functional group level.
+The original annotation included a large number of pollen taxa with highly imbalanced class frequencies. To reduce classification ambiguity and ensure sufficient training samples per class, several rare or morphologically similar taxa were merged at the family or functional group level. After merging the final dataset contains 32 taxonomic classes used for model training:
+
+- Acer  
+- Alnus viridis  
+- Apiaceae  
+- Artemisia
+- Asteraceae 
+- Betula pendula  
+- Botryococcus  
+- Charcoal  
+- Chenopodiaceae  
+- Corylus  
+- Cyperaceae  
+- Equisetum  
+- Ferns  
+- Filipendula  
+- Fraxinus  
+- Gymnosperms  
+- Juglans  
+- Juniperus  
+- Larix  
+- Lycopodium   
+- Others  
+- Pediastrum boryanum  
+- Pediastrum integrum  
+- Picea  
+- Pine  
+- Pinus stomata  
+- Plantago  
+- Poaceae  
+- Quercus  
+- Rumex  
+- Salix  
+- Steraceae  
 
 Merged groups include:
 - Asteraceae (e.g. Achillea, Ambrosia, Senecio-type, Cirsium-type)
