@@ -36,7 +36,7 @@ This figure is the primary diagnostic tool for understanding classification erro
 
 ---
 
-## 🖼 Example Predictions
+## 🖼 Annotated Examples
 
 Representative annotated examples are included to provide qualitative validation of the model.
 
