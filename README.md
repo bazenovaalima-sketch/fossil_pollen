@@ -1,15 +1,18 @@
-# fossil_pollen → ARM-2
+# fossil_pollen — ARM-2
 
-Automated detection and classification of fossil pollen grains in microscope images. The project evolved in two phases:
+Automated detection and classification of fossil pollen grains in microscope images, evolving across two phases:
 
-- **Phase 1 (YOLO)** — multi-class object detection with YOLOv8, establishing the baseline pipeline and dataset.
-- **Phase 2 (RT-DETR + hardware)** — upgraded detector, stronger metrics, and a fully autonomous motorised stage built around an Arduino MEGA and two 28BYJ-48 stepper motors so the microscope scans slides without human intervention.
+| | Phase 1 | Phase 2 |
+|---|---|---|
+| **Model** | YOLOv8 | RT-DETR-L |
+| **Stage** | Manual | Motorised (Arduino + 2× stepper) |
+| **mAP@50** | 0.620 | **0.751** |
 
 ---
 
-## Results
+## Model performance
 
-### Model comparison — YOLO (baseline) vs RT-DETR-L (current)
+### YOLO vs RT-DETR-L comparison
 
 | Metric | YOLOv8 (Phase 1) | RT-DETR-L (Phase 2) | Δ |
 |---|---:|---:|---:|
@@ -18,11 +21,15 @@ Automated detection and classification of fossil pollen grains in microscope ima
 | mAP@50 | 0.620 | **0.751** | +0.131 |
 | mAP@50–95 | 0.482 | **0.590** | +0.108 |
 
-RT-DETR-L trained for 100 epochs on a Tesla T4 (Google Colab, ~5 h).  
-Dataset: **~2,500 microscopy images** · **24 palynological taxa** (incl. charcoal as a confounder).
+RT-DETR-L: 310 layers · 32 M params · 100 epochs · Tesla T4 (Google Colab, ~5 h).
+
+<p align="center">
+  <img src="assets/training_metrics.jpg" alt="RT-DETR training curves" width="820"/>
+  <br/><em>RT-DETR-L training/validation losses, mAP and P–R curves over 100 epochs.</em>
+</p>
 
 <details>
-<summary><strong>Per-class RT-DETR evaluation (click to expand)</strong></summary>
+<summary><strong>Per-class RT-DETR results — 24 classes (click to expand)</strong></summary>
 
 | Taxon | Val Images | Instances | P | R | mAP50 | mAP50-95 |
 |---|---:|---:|---:|---:|---:|---:|
@@ -54,193 +61,59 @@ Dataset: **~2,500 microscopy images** · **24 palynological taxa** (incl. charco
 
 </details>
 
-<p align="center">
-  <img src="docs/images/training_metrics.jpg" alt="RT-DETR training curves" width="820"/>
-  <br/><em>Training/validation losses, mAP and P–R curves over 100 epochs (RT-DETR-L).</em>
-</p>
+<details>
+<summary><strong>Per-class YOLO results — 32 classes (click to expand)</strong></summary>
 
-See [`results/example_predictions/`](results/example_predictions/) for annotated output images, and [`results/metrics.md`](results/metrics.md) for the full YOLO vs RT-DETR comparison.
+| Class | Images | Instances | P | R | mAP@50 | mAP@50–95 |
+|---|---:|---:|---:|---:|---:|---:|
+| all | 328 | 448 | 0.679 | 0.603 | 0.620 | 0.482 |
+| Acer | 2 | 2 | 0.151 | 0.500 | 0.511 | 0.410 |
+| Alnus viridis | 12 | 13 | 1.000 | 0.741 | 0.943 | 0.681 |
+| Apiaceae | 10 | 10 | 1.000 | 0.854 | 0.914 | 0.692 |
+| Artemisia | 46 | 52 | 0.902 | 0.923 | 0.942 | 0.707 |
+| Betula pendula | 14 | 15 | 0.567 | 0.933 | 0.826 | 0.655 |
+| Botryococcus | 3 | 3 | 0.000 | 0.000 | 0.256 | 0.242 |
+| Charcoal | 33 | 35 | 0.705 | 0.943 | 0.892 | 0.627 |
+| Chenopodiaceae | 17 | 17 | 0.847 | 0.979 | 0.971 | 0.711 |
+| Corylus | 2 | 2 | 0.652 | 1.000 | 0.663 | 0.548 |
+| Cyperaceae | 6 | 6 | 0.656 | 0.333 | 0.367 | 0.281 |
+| Equisetum | 2 | 2 | 0.000 | 0.000 | 0.081 | 0.059 |
+| Ferns | 21 | 22 | 0.886 | 0.709 | 0.833 | 0.632 |
+| Filipendula | 1 | 1 | 1.000 | 0.000 | 0.045 | 0.032 |
+| Fraxinus | 7 | 7 | 0.504 | 0.436 | 0.538 | 0.428 |
+| Gymnosperms | 5 | 5 | 0.727 | 0.545 | 0.588 | 0.499 |
+| Juglans | 3 | 3 | 1.000 | 0.000 | 0.191 | 0.153 |
+| Juniperus | 3 | 3 | 1.000 | 0.000 | 0.129 | 0.129 |
+| Larix | 1 | 1 | 1.000 | 0.000 | 0.083 | 0.066 |
+| Lycopodium | 45 | 48 | 0.793 | 0.958 | 0.958 | 0.759 |
+| Others | 3 | 3 | 0.475 | 0.333 | 0.350 | 0.315 |
+| Pediastrum boryanum | 4 | 4 | 0.668 | 0.750 | 0.808 | 0.461 |
+| Pediastrum integrum | 12 | 13 | 0.758 | 0.769 | 0.888 | 0.597 |
+| Picea | 3 | 3 | 0.408 | 0.667 | 0.631 | 0.539 |
+| Pine | 96 | 106 | 0.850 | 0.964 | 0.971 | 0.802 |
+| Pinus stomata | 1 | 1 | 0.457 | 1.000 | 0.995 | 0.895 |
+| Plantago | 2 | 2 | 0.640 | 0.919 | 0.828 | 0.630 |
+| Poaceae | 48 | 49 | 0.744 | 0.959 | 0.906 | 0.726 |
+| Quercus | 2 | 2 | 1.000 | 0.000 | 0.114 | 0.101 |
+| Rumex | 4 | 4 | 0.451 | 1.000 | 0.674 | 0.572 |
+| Salix | 9 | 9 | 0.554 | 0.667 | 0.600 | 0.445 |
+| Steraceae | 5 | 5 | 0.641 | 0.800 | 0.718 | 0.546 |
 
----
+</details>
 
-## Hardware — automated microscope stage
-
-<p align="center">
-  <img src="docs/images/setup.png" alt="ARM-2 full setup" width="820"/>
-  <br/><em>Olympus CX41 microscope with motorised stage. Arduino MEGA + two 28BYJ-48 steppers visible bottom-right. Live RT-DETR feed on the laptop.</em>
-</p>
-
-### Bill of materials
-
-| Component | Qty | Notes |
-|---|---:|---|
-| Arduino MEGA 2560 | 1 | Drives both motors via Firmata |
-| 28BYJ-48 stepper motor (5 V) | 2 | One per axis (X, Y) |
-| ULN2003 driver board | 2 | Bundled with the motors |
-| Olympus CX41 microscope | 1 | Any compound microscope with a movable stage works |
-| USB microscope camera | 1 | Any OpenCV-compatible camera |
-| 3D-printed mounts | 3 | See `hardware/stl/` |
-| Jumper wires, USB cable | — | |
-
-### Wiring
-
-<p align="center">
-  <img src="docs/images/breadboard.png" alt="Breadboard wiring" width="700"/>
-  <br/><em>Breadboard view — two 28BYJ-48 + ULN2003 stepper modules driven by an Arduino MEGA 2560.</em>
-</p>
-
-<p align="center">
-  <img src="docs/images/schematic.png" alt="Schematic" width="700"/>
-  <br/><em>Equivalent schematic.</em>
-</p>
-
-| Axis | IN1 | IN2 | IN3 | IN4 |
-|---|---:|---:|---:|---:|
-| X motor | D4 | D5 | D6 | D7 |
-| Y motor | D8 | D9 | D10 | D11 |
-
-### 3D-printed parts (`hardware/stl/`)
-
-| File | Purpose |
-|---|---|
-| `stage.stl` | Main stage extension that interfaces with the microscope's mechanical stage |
-| `stage_mount.stl` | Bracket that anchors the X-motor and aligns it with the stage knob |
-| `coupling.stl` | Adapter coupling linking the stepper output shaft to the focus / translation knob |
-
-Print settings: **PLA · 0.2 mm layers · 30 % infill · no supports** (orient flat faces down).
-
----
-
-## Software
-
-### Architecture (Phase 2 — autonomous scan)
-
-The Python application runs as **two cooperating threads**:
-
-```
-┌──────────────────────────────────┐         ┌──────────────────────────────────┐
-│  Scanner thread                   │         │  Main / display thread            │
-│  ─ drives X then Y motors         │ signal  │  ─ reads camera frames            │
-│  ─ pauses at each position        │ ──────▶ │  ─ runs RT-DETR inference         │
-│  ─ raises `capture_trigger`       │         │  ─ displays annotated feed        │
-│  ─ waits for main to clear it     │ ◀────── │  ─ on trigger: saves img + CSV row │
-└──────────────────────────────────┘  ack    └──────────────────────────────────┘
-```
-
-Live inference never blocks on motor moves; each logged detection is paired with the exact motor position that produced it.
-
-### Installation
-
-```bash
-git clone https://github.com/bazenovaalima-sketch/fossil_pollen.git
-cd fossil_pollen
-python -m venv venv
-source venv/bin/activate          # Windows: venv\Scripts\activate
-pip install -r requirements.txt
-```
-
-Flash **StandardFirmata** to the Arduino MEGA — see [`arduino/README.md`](arduino/README.md).
-
-### Configuration
-
-Edit `src/config.py` to match your hardware:
-
-```python
-SERIAL_PORT    = "/dev/cu.usbmodem14101"   # Arduino port (Windows: "COM3" etc.)
-CAMERA_INDEX   = 0
-X_MOTOR_PINS   = [4, 5, 6, 7]
-Y_MOTOR_PINS   = [8, 9, 10, 11]
-MOVES_PER_AXIS = 10        # stops per axis
-STEPS_PER_MOVE = 200       # half-steps between stops
-PAUSE_SECONDS  = 2.0       # settle / focus time after each move
-CONF_THRESHOLD = 0.30
-MODEL_PATH     = "weights/best.pt"
-```
-
-### Run (autonomous scan)
-
-```bash
-python src/auto_scan.py
-```
-
-The script opens a live annotated window, steps the X axis through `MOVES_PER_AXIS` positions, logs detections to `auto_scan_log.csv` and saves annotated images to `captures/`, then repeats for the Y axis. Press **`q`** to stop cleanly.
-
-### Run (YOLO inference — Phase 1 scripts)
-
-Batch inference on a folder:
-```bash
-python inference/predict_folder.py --weights best.pt --input /path/to/images --conf 0.3
-```
-
-Real-time microscope feed (Windows / DirectShow):
-```bash
-python inference/realtime_microscope.py
-```
-
----
-
-## Repository structure
-
-```
-fossil_pollen/
-├── README.md
-├── requirements.txt
-├── LICENSE
-├── arduino/
-│   └── README.md              ← how to flash StandardFirmata
-├── docs/
-│   └── images/
-│       ├── setup.png
-│       ├── breadboard.png
-│       ├── schematic.png
-│       └── training_metrics.jpg
-├── hardware/
-│   └── stl/
-│       ├── stage.stl
-│       ├── stage_mount.stl
-│       └── coupling.stl
-├── src/                       ← Phase 2: RT-DETR + autonomous scan
-│   ├── config.py
-│   ├── motor_control.py
-│   └── auto_scan.py
-├── training/
-│   ├── train_yolo.py          ← Phase 1: YOLO training
-│   └── README.md              ← RT-DETR training recipe
-├── inference/                 ← Phase 1: YOLO inference scripts
-│   ├── predict_folder.py
-│   └── realtime_microscope.py
-├── data/
-│   └── README.md
-├── results/
-│   ├── metrics.md             ← YOLO vs RT-DETR comparison
-│   └── example_predictions/  ← annotated output examples
-│       ├── README.md
-│       ├── example_good_01_pediastrum_chenopodiaceae.png
-│       ├── example_good_02_artemisia_poaceae_lycopodium.png
-│       ├── example_good_03_pine_lycopodium_poacea_charcoal.png
-│       ├── example_good_04_pine_betula_poaceae.png
-│       ├── example_good_05_alnus_viridis.png
-│       ├── example_good_06_apiaceae.png
-│       ├── example_good_07_steraceae.png
-│       └── failure_cases/
-│           ├── README.md
-│           ├── failure_fn_pine.png
-│           ├── failure_fp_chenopodiaceae.png
-│           └── failure_fp_pinus_stomata.png
-├── figures/
-│   └── performance_figures/  ← YOLO evaluation figures
-│       ├── BoxPR_curve.png
-│       ├── confusion_matrix_normalized.png
-│       └── map_per_class_bar.png
-└── weights/
-    └── best.pt               ← trained weights (use Git LFS or GitHub Release)
-```
+Example annotated outputs are in [`results/example_predictions/`](results/example_predictions/).
 
 ---
 
 ## Dataset
 
-Custom dataset of **~2,500 microscopy images** from sediment samples at the Latoriței site (Southern Carpathians, Romania, depths 1101–1102 m, Late Glacial). Annotated with bounding boxes using Roboflow across 24 palynological taxa.
+~2,500 light microscope images from sediment core samples at the **Latoriței site** (Southern Carpathians, Romania, depths 1101–1102 m, Late Glacial). Annotated using Roboflow with bounding boxes.
+
+- Phase 1 (YOLO): 2,025 images · 2,770 instances · **32 classes**
+- Phase 2 (RT-DETR): 2,500 images · **24 classes** (rare taxa merged or dropped for better recall)
+
+<details>
+<summary><strong>Annotation counts by taxon — RT-DETR dataset</strong></summary>
 
 | Taxon | Count | Taxon | Count |
 |---|---:|---|---:|
@@ -259,17 +132,138 @@ Custom dataset of **~2,500 microscopy images** from sediment samples at the Lato
 | Pediastrum boryanum | 45 | | |
 | Cyperaceae | 37 | | |
 
-The dataset is class-imbalanced (Pine ≈ 23 % of all annotations). Class weighting and targeted oversampling of rare taxa are planned for v3.
+</details>
+
+The dataset is not stored in this repository due to file size. Available upon reasonable request or via an external data repository.
+
+---
+
+## Hardware — motorised stage
+
+<p align="center">
+  <img src="assets/setup.png" alt="ARM-2 full setup" width="820"/>
+  <br/><em>Olympus CX41 with motorised stage. Arduino MEGA + two 28BYJ-48 steppers visible bottom-right.</em>
+</p>
+
+<p align="center">
+  <img src="assets/breadboard.png" alt="Breadboard wiring" width="700"/>
+  <br/><em>Breadboard — two 28BYJ-48 + ULN2003 modules driven by an Arduino MEGA 2560.</em>
+</p>
+
+<p align="center">
+  <img src="assets/schematic.png" alt="Schematic" width="700"/>
+  <br/><em>Equivalent schematic.</em>
+</p>
+
+Full bill of materials, pin map, and 3D-print settings are in [`hardware/README.md`](hardware/README.md).  
+Arduino flashing instructions are in [`arduino/README.md`](arduino/README.md).
+
+---
+
+## Weights
+
+Trained weights are released as GitHub Release assets — not committed to the repository.
+
+| Model | File | Params | mAP@50 |
+|---|---|---:|---:|
+| YOLOv8 (Phase 1) | `yolov8_best.pt` | ~25 M | 0.620 |
+| RT-DETR-L (Phase 2) | `rtdetr_best.pt` | 32 M | **0.751** |
+
+Download from the [Releases page](../../releases) and place the file at `weights/best.pt`.
+
+---
+
+## Installation
+
+```bash
+git clone https://github.com/bazenovaalima-sketch/fossil_pollen.git
+cd fossil_pollen
+python -m venv venv
+source venv/bin/activate        # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+```
+
+Flash **StandardFirmata** to the Arduino MEGA — see [`arduino/README.md`](arduino/README.md).
+
+---
+
+## Usage
+
+### Autonomous scan (Phase 2 — RT-DETR)
+
+Edit `scanner/config.py` to match your hardware (serial port, camera index, motor pins, scan pattern), then:
+
+```bash
+python scanner/auto_scan.py
+```
+
+The script opens a live annotated window, steps the X axis through `MOVES_PER_AXIS` positions, logs detections to `auto_scan_log.csv` and saves annotated images to `captures/`. Then repeats for the Y axis. Press **`q`** to stop cleanly.
+
+### Training
+
+```bash
+# Phase 1 — YOLOv8
+python training/train_yolo.py --data /path/to/data.yaml
+
+# Phase 2 — RT-DETR-L (Google Colab recommended)
+# see training/README.md
+```
+
+---
+
+## Repository structure
+
+```
+fossil_pollen/
+├── README.md
+├── requirements.txt
+├── LICENSE
+├── scanner/                 ← Phase 2: RT-DETR autonomous scan
+│   ├── auto_scan.py
+│   ├── config.py
+│   └── motor_control.py
+├── training/
+│   ├── train_yolo.py        ← Phase 1: YOLOv8 training
+│   └── README.md            ← RT-DETR-L training recipe
+├── hardware/
+│   ├── README.md            ← BOM, wiring, print settings
+│   └── stl/
+│       ├── stage.stl
+│       ├── stage_mount.stl
+│       └── coupling.stl
+├── arduino/
+│   └── README.md            ← StandardFirmata flashing guide
+├── assets/                  ← images embedded in this README
+│   ├── setup.png
+│   ├── breadboard.png
+│   ├── schematic.png
+│   └── training_metrics.jpg
+├── results/
+│   └── example_predictions/ ← annotated output samples
+│       ├── example_good_01_pediastrum_chenopodiaceae.png
+│       ├── example_good_02_artemisia_poaceae_lycopodium.png
+│       ├── example_good_03_pine_lycopodium_poacea_charcoal.png
+│       ├── example_good_04_pine_betula_poaceae.png
+│       ├── example_good_05_alnus_viridis.png
+│       ├── example_good_06_apiaceae.png
+│       ├── example_good_07_steraceae.png
+│       └── failure_cases/
+│           ├── failure_fn_pine.png
+│           ├── failure_fp_chenopodiaceae.png
+│           └── failure_fp_pinus_stomata.png
+└── weights/                 ← download from Releases (not in git)
+    └── best.pt
+```
 
 ---
 
 ## Future work
 
-- **Z-axis autofocus** — third stepper on the fine-focus knob + Laplacian sharpness metric.
-- **Whole-slide mosaic** — stitch fields of view into a panoramic image with per-grain coordinates.
-- **Active learning** — surface low-confidence detections for human review and loop them back into training.
-- **Class re-balancing** — targeted annotation of under-represented taxa (`Cyperaceae`, `Other_pollen`, `Fagus`).
-- **Edge deployment** — port inference to a Jetson Nano for a fully standalone instrument.
+- **Z-axis autofocus** — third stepper on the fine-focus knob + Laplacian sharpness metric
+- **Whole-slide mosaic** — stitch fields of view into a panoramic image with per-grain coordinates
+- **Active learning** — surface low-confidence detections for human review and loop back into training
+- **Class re-balancing** — targeted annotation of under-represented taxa (`Cyperaceae`, `Fagus`, `Convolvulus`)
+- **Edge deployment** — port inference to a Jetson Nano for a fully standalone instrument
 
 ---
 
@@ -286,8 +280,8 @@ The dataset is class-imbalanced (Pine ≈ 23 % of all annotations). Class weight
 
 ## License
 
-Code released under the **MIT License** — see [`LICENSE`](LICENSE).  
-3D hardware files (`hardware/stl/`) released under **CERN-OHL-S v2**.
+Code — **MIT License** (see [`LICENSE`](LICENSE)).  
+3D hardware files (`hardware/stl/`) — **CERN-OHL-S v2**.
 
 ## Acknowledgments
 

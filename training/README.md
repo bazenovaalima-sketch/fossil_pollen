@@ -1,8 +1,14 @@
 # Training
 
-The model used in this project is **RT-DETR-L** from Ultralytics, fine-tuned on a custom annotated dataset of ~2,500 microscopy images covering 24 palynological taxa.
+## Phase 1 — YOLOv8
 
-## Recipe
+```bash
+python training/train_yolo.py --data /path/to/data.yaml --weights yolov8m.pt --epochs 100
+```
+
+Key augmentations: `degrees=180`, `flipud=0.5`, `hsv_s=0.7`, `hsv_v=0.6` — microscopy images can appear at any rotation and with varying stain intensity.
+
+## Phase 2 — RT-DETR-L
 
 | Setting | Value |
 |---|---|
@@ -11,21 +17,10 @@ The model used in this project is **RT-DETR-L** from Ultralytics, fine-tuned on 
 | Backend | PyTorch 2.10.0 + CUDA 12.8 |
 | Hardware | Tesla T4 (14.9 GB) on Google Colab |
 | Epochs | 100 |
-| Wall-clock time | ~5 hours |
+| Wall-clock time | ~5 h |
 | Input resolution | 640 × 640 |
 | Validation split | 401 images / 546 instances |
 
-## Final metrics (best checkpoint)
+The training notebook (`train_rtdetr.ipynb`) is meant to run on Google Colab with GPU. Drop the dataset (Ultralytics/YOLO format with a `data.yaml`) onto Drive and update the path at the top of the notebook.
 
-| Metric | Value |
-|---|---:|
-| Precision | 0.811 |
-| Recall    | 0.734 |
-| mAP@50    | 0.751 |
-| mAP@50–95 | 0.590 |
-
-See the per-class table and the full training curves in the top-level [README](../README.md).
-
-## Reproducing
-
-The training notebook (`train_rtdetr.ipynb`) is meant to be run on Google Colab with GPU. Drop your dataset (in YOLO/Ultralytics format with a `data.yaml`) onto Drive and update the path at the top of the notebook.
+For full metrics and a YOLO vs RT-DETR comparison see the [README](../README.md).
